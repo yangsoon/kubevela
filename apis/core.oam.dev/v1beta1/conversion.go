@@ -16,20 +16,5 @@
 
 package v1beta1
 
-// Hub marks *v1alpha2.ComponentDefinition as a conversion hub.
-func (*ComponentDefinition) Hub() {}
-
-// Hub marks *v1alpha2.WorkloadDefinition as a conversion hub.
-func (*WorkloadDefinition) Hub() {}
-
-// Hub marks *v1alpha2.TraitDefinition as a conversion hub.
-func (*TraitDefinition) Hub() {}
-
 // Hub marks *v1alpha2.Application as a conversion hub.
 func (*Application) Hub() {}
-
-// Hub marks *v1alpha2.AppRollout as a conversion hub.
-func (*AppRollout) Hub() {}
-
-// Hub marks *v1alpha2.ApplicationRevision as a conversion hub.
-func (*ApplicationRevision) Hub() {}

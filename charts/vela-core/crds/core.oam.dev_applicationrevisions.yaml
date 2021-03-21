@@ -1914,13 +1914,13 @@ spec:
                           properties:
                             name:
                               type: string
-                            properties:
-                              type: object
-                              x-kubernetes-preserve-unknown-fields: true
                             scopes:
                               additionalProperties:
                                 type: string
                               description: scopes in ApplicationComponent defines the component-level scopes the format is <scope-type:scope-instance-name> pairs, the key represents type of `ScopeDefinition` while the value represent the name of scope instance.
+                              type: object
+                              x-kubernetes-preserve-unknown-fields: true
+                            settings:
                               type: object
                               x-kubernetes-preserve-unknown-fields: true
                             traits:
@@ -1942,7 +1942,7 @@ spec:
                               type: string
                           required:
                           - name
-                          - properties
+                          - settings
                           - type
                           type: object
                         type: array

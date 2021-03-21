@@ -52,7 +52,7 @@ type ApplicationComponent struct {
 	Name         string `json:"name"`
 	WorkloadType string `json:"type"`
 	// +kubebuilder:pruning:PreserveUnknownFields
-	Properties runtime.RawExtension `json:"properties"`
+	Settings runtime.RawExtension `json:"settings"`
 
 	// Traits define the trait of one component, the type must be array to keep the order.
 	Traits []v1alpha2.ApplicationTrait `json:"traits,omitempty"`

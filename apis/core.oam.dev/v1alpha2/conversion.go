@@ -24,27 +24,13 @@ import (
 // ConvertTo converts this WorkloadDefinition to the Hub version (v1alpa2).
 func (app *Application) ConvertTo(dstRaw conversion.Hub) error {
 
-	klog.Infof("ConvertTo Application convert %s from %s to", app.Name, app.APIVersion)
+	klog.Infof("ConvertTo Application convert %s from %s to\n", app.Name, app.APIVersion)
 	return nil
 }
 
 // ConvertFrom converts from the Hub version (v1alpa1) to this version (v1beta1).
 func (app *Application) ConvertFrom(srcRaw conversion.Hub) error {
 
-	klog.Infof(" ConvertFrom Application convert %s from %s to %s", app.Name, app.APIVersion, app.APIVersion)
-	return nil
-}
-
-// ConvertTo converts this WorkloadDefinition to the Hub version (v1alpa2).
-func (app *ComponentDefinition) ConvertTo(dstRaw conversion.Hub) error {
-
-	klog.Infof("ConvertTo ComponentDefinition convert %s from %s to", app.Name, app.APIVersion)
-	return nil
-}
-
-// ConvertFrom converts from the Hub version (v1alpa1) to this version (v1beta1).
-func (app *ComponentDefinition) ConvertFrom(srcRaw conversion.Hub) error {
-
-	klog.Infof(" ConvertFrom ComponentDefinition convert %s from %s to %s", app.Name, app.APIVersion, app.APIVersion)
+	klog.Infof(" ConvertFrom Application convert %s from %s to\n", app.Name, app.APIVersion)
 	return nil
 }

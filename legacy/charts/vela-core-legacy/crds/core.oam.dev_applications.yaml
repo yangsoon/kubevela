@@ -15,6 +15,8 @@ spec:
     plural: applications
     singular: application
   scope: Namespaced
+  subresources:
+    status: {}
   validation:
     openAPIV3Schema:
       description: Application is the Schema for the applications API
@@ -36,13 +38,13 @@ spec:
                 properties:
                   name:
                     type: string
-                  properties:
-                    type: object
-                    
                   scopes:
                     additionalProperties:
                       type: string
                     description: scopes in ApplicationComponent defines the component-level scopes the format is <scope-type:scope-instance-name> pairs, the key represents type of `ScopeDefinition` while the value represent the name of scope instance.
+                    type: object
+                    
+                  settings:
                     type: object
                     
                   traits:
@@ -64,7 +66,7 @@ spec:
                     type: string
                 required:
                 - name
-                - properties
+                - settings
                 - type
                 type: object
               type: array
