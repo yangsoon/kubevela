@@ -4,6 +4,8 @@ import (
 	"context"
 	"net/http"
 
+	"sigs.k8s.io/controller-runtime/pkg/webhook/conversion"
+
 	admissionv1beta1 "k8s.io/api/admission/v1beta1"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/manager"
@@ -83,5 +85,6 @@ func RegisterValidatingHandler(mgr manager.Manager) error {
 	}
 	server := mgr.GetWebhookServer()
 	server.Register("/validating-core-oam-dev-v1alpha2-applications", &webhook.Admission{Handler: &ValidatingHandler{dm: mapper}})
+	server.Register("/convert", &conversion.Webhook{})
 	return nil
 }
