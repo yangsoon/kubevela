@@ -52,7 +52,7 @@ func (h *ValidatingHandler) InjectDecoder(d *admission.Decoder) error {
 func (h *ValidatingHandler) Handle(ctx context.Context, req admission.Request) admission.Response {
 	app := &v1alpha2.Application{}
 	if err := h.Decoder.Decode(req, app); err != nil {
-		return admission.Errored(http.StatusBadRequest, err)
+		return admission.ValidationResponse(true, "")
 	}
 	ctx = util.SetNamespaceInCtx(ctx, app.Namespace)
 	switch req.Operation {

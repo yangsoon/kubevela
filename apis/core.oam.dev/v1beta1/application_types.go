@@ -78,6 +78,7 @@ type ApplicationSpec struct {
 // +kubebuilder:object:root=true
 
 // Application is the Schema for the applications API
+// +kubebuilder:storageversion
 // +kubebuilder:subresource:status
 type Application struct {
 	metav1.TypeMeta   `json:",inline"`

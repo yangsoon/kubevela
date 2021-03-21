@@ -24,7 +24,8 @@ spec:
           namespace: vela-system
           name: vela-core-webhook
           path: /convert
-      conversionReviewVersions: ["v1beta1", "v1alpha2"]
+          port: 443
+      conversionReviewVersions: ["v1alpha2","v1beta1"]
   versions:
   - name: v1alpha2
     schema:
@@ -474,7 +475,7 @@ spec:
             type: object
         type: object
     served: true
-    storage: true
+    storage: false
     subresources:
       status: {}
   - name: v1beta1
@@ -925,7 +926,7 @@ spec:
             type: object
         type: object
     served: true
-    storage: false
+    storage: true
     subresources:
       status: {}
 status:

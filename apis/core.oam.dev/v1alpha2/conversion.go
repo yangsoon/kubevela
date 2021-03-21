@@ -16,20 +16,35 @@
 
 package v1alpha2
 
-// Hub marks *v1alpha2.ComponentDefinition as a conversion hub.
-func (*ComponentDefinition) Hub() {}
+import (
+	"k8s.io/klog/v2"
+	"sigs.k8s.io/controller-runtime/pkg/conversion"
+)
 
-// Hub marks *v1alpha2.WorkloadDefinition as a conversion hub.
-func (*WorkloadDefinition) Hub() {}
+// ConvertTo converts this WorkloadDefinition to the Hub version (v1alpa2).
+func (app *Application) ConvertTo(dstRaw conversion.Hub) error {
 
-// Hub marks *v1alpha2.TraitDefinition as a conversion hub.
-func (*TraitDefinition) Hub() {}
+	klog.Infof("ConvertTo Application convert %s from %s to", app.Name, app.APIVersion)
+	return nil
+}
 
-// Hub marks *v1alpha2.Application as a conversion hub.
-func (*Application) Hub() {}
+// ConvertFrom converts from the Hub version (v1alpa1) to this version (v1beta1).
+func (app *Application) ConvertFrom(srcRaw conversion.Hub) error {
 
-// Hub marks *v1alpha2.AppRollout as a conversion hub.
-func (*AppRollout) Hub() {}
+	klog.Infof(" ConvertFrom Application convert %s from %s to %s", app.Name, app.APIVersion, app.APIVersion)
+	return nil
+}
 
-// Hub marks *v1alpha2.ApplicationRevision as a conversion hub.
-func (*ApplicationRevision) Hub() {}
+// ConvertTo converts this WorkloadDefinition to the Hub version (v1alpa2).
+func (app *ComponentDefinition) ConvertTo(dstRaw conversion.Hub) error {
+
+	klog.Infof("ConvertTo ComponentDefinition convert %s from %s to", app.Name, app.APIVersion)
+	return nil
+}
+
+// ConvertFrom converts from the Hub version (v1alpa1) to this version (v1beta1).
+func (app *ComponentDefinition) ConvertFrom(srcRaw conversion.Hub) error {
+
+	klog.Infof(" ConvertFrom ComponentDefinition convert %s from %s to %s", app.Name, app.APIVersion, app.APIVersion)
+	return nil
+}
