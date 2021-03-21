@@ -36,13 +36,13 @@ spec:
                 properties:
                   name:
                     type: string
-                  properties:
-                    type: object
-                    
                   scopes:
                     additionalProperties:
                       type: string
                     description: scopes in ApplicationComponent defines the component-level scopes the format is <scope-type:scope-instance-name> pairs, the key represents type of `ScopeDefinition` while the value represent the name of scope instance.
+                    type: object
+                    
+                  settings:
                     type: object
                     
                   traits:
@@ -64,7 +64,7 @@ spec:
                     type: string
                 required:
                 - name
-                - properties
+                - settings
                 - type
                 type: object
               type: array
@@ -465,10 +465,10 @@ spec:
   versions:
   - name: v1alpha2
     served: true
-    storage: false
+    storage: true
   - name: v1beta1
     served: true
-    storage: true
+    storage: false
 status:
   acceptedNames:
     kind: ""

@@ -154,5 +154,30 @@ webhooks:
           - UPDATE
         resources:
           - podspecworkloads
-
+  - clientConfig:
+      caBundle: Cg==
+      service:
+        name: {{ template "kubevela.name" . }}-webhook
+        namespace: {{ .Release.Namespace }}
+        path: /validating-core-oam-dev-v1alpha2-applications
+    {{- if .Values.admissionWebhooks.patch.enabled  }}
+    failurePolicy: Ignore
+    {{- else }}
+    failurePolicy: {{ .Values.admissionWebhooks.failurePolicy }}
+    {{- end }}
+    name: validating.core.oam.dev.v1alpha2.applications
+    rules:
+      - apiGroups:
+          - core.oam.dev
+        apiVersions:
+          - v1alpha2
+        operations:
+          - CREATE
+          - UPDATE
+        resources:
+          - applications
+        scope: Namespaced
+    admissionReviewVersions:
+      - v1beta1
+    timeoutSeconds: 5
 {{- end -}}
