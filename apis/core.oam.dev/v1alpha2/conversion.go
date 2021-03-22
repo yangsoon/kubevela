@@ -21,6 +21,8 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/conversion"
 )
 
+var _ conversion.Convertible = &Application{}
+
 // ConvertTo converts this WorkloadDefinition to the Hub version (v1alpa2).
 func (app *Application) ConvertTo(dstRaw conversion.Hub) error {
 
