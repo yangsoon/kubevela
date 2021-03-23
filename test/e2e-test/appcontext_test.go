@@ -305,11 +305,11 @@ var _ = Describe("Test applicationContext reconcile", func() {
 	})
 })
 
-func convertComponentList2Map(comps []*v1alpha2.Component) map[string]v1alpha2.Component {
-	objs := map[string]v1alpha2.Component{}
+func convertComponentList2Map(comps []*v1alpha2.Component) map[string]runtime.RawExtension {
+	objs := map[string]runtime.RawExtension{}
 	for _, comp := range comps {
 		obj := comp.DeepCopy()
-		objs[comp.Name] = *obj
+		objs[comp.Name] = util.Object2RawExtension(obj)
 	}
 	return objs
 }

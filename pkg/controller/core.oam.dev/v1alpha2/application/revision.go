@@ -19,10 +19,13 @@ package application
 import (
 	"context"
 
+	"k8s.io/apimachinery/pkg/runtime"
+
 	"github.com/pkg/errors"
 	apiequality "k8s.io/apimachinery/pkg/api/equality"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
+	"github.com/oam-dev/kubevela/apis/core.oam.dev/common"
 	"github.com/oam-dev/kubevela/apis/core.oam.dev/v1alpha2"
 	"github.com/oam-dev/kubevela/pkg/controller/utils"
 	"github.com/oam-dev/kubevela/pkg/oam"
@@ -105,7 +108,7 @@ func (h *appHandler) GenerateRevision(ctx context.Context, ac *v1alpha2.Applicat
 	// need to create a new appRev
 	var revision int64
 	appRev.Name, revision = utils.GetAppNextRevision(h.app)
-	h.app.Status.LatestRevision = &v1alpha2.Revision{
+	h.app.Status.LatestRevision = &common.Revision{
 		Name:         appRev.Name,
 		Revision:     revision,
 		RevisionHash: appRevisionHash,
@@ -119,11 +122,11 @@ func (h *appHandler) GenerateRevision(ctx context.Context, ac *v1alpha2.Applicat
 	return true, appRev, nil
 }
 
-func convertComponentList2Map(comps []*v1alpha2.Component) map[string]v1alpha2.Component {
-	objs := map[string]v1alpha2.Component{}
+func convertComponentList2Map(comps []*v1alpha2.Component) map[string]runtime.RawExtension {
+	objs := map[string]runtime.RawExtension{}
 	for _, comp := range comps {
 		obj := comp.DeepCopy()
-		objs[comp.Name] = *obj
+		objs[comp.Name] = util.Object2RawExtension(obj)
 	}
 	return objs
 }
