@@ -168,7 +168,7 @@ func ReadObjectsFromFile(path string) ([]oam.Object, error) {
 	return objs, nil
 }
 
-func readApplicationFromFile(filename string) (*corev1alpha2.Application, error) {
+func readApplicationFromFile(filename string) (*corev1beta1.Application, error) {
 
 	fileContent, err := ioutil.ReadFile(filepath.Clean(filename))
 	if err != nil {
@@ -184,7 +184,7 @@ func readApplicationFromFile(filename string) (*corev1alpha2.Application, error)
 		}
 	}
 
-	app := new(corev1alpha2.Application)
+	app := new(corev1beta1.Application)
 	err = json.Unmarshal(fileContent, app)
 	return app, err
 }

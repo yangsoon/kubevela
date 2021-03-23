@@ -442,7 +442,7 @@ outputs: ingress: {
 					assert.Equal(t, comp.Name, c.want.app.Spec.Components[idx].Name)
 					assert.Equal(t, comp.Scopes, c.want.app.Spec.Components[idx].Scopes)
 
-					got, err := util.RawExtension2Map(&comp.Settings)
+					got, err := util.RawExtension2Map(&comp.Properties)
 					assert.NoError(t, err)
 					exp, err := util.RawExtension2Map(&c.want.app.Spec.Components[idx].Settings)
 					assert.NoError(t, err)

@@ -596,6 +596,7 @@ spec:
                   type: object
                 description: Components records the rendered components from Application, it will contains the whole K8s CR of workload in it.
                 type: object
+                x-kubernetes-preserve-unknown-fields: true
               scopeDefinitions:
                 additionalProperties:
                   description: A ScopeDefinition registers a kind of Kubernetes custom resource as a valid OAM scope kind by referencing its CustomResourceDefinition. The CRD is used to validate the schema of the scope when it is embedded in an OAM ApplicationConfiguration.
@@ -941,13 +942,13 @@ spec:
                           properties:
                             name:
                               type: string
+                            properties:
+                              type: object
+                              x-kubernetes-preserve-unknown-fields: true
                             scopes:
                               additionalProperties:
                                 type: string
                               description: scopes in ApplicationComponent defines the component-level scopes the format is <scope-type:scope-instance-name> pairs, the key represents type of `ScopeDefinition` while the value represent the name of scope instance.
-                              type: object
-                              x-kubernetes-preserve-unknown-fields: true
-                            settings:
                               type: object
                               x-kubernetes-preserve-unknown-fields: true
                             traits:
@@ -969,7 +970,7 @@ spec:
                               type: string
                           required:
                           - name
-                          - settings
+                          - properties
                           - type
                           type: object
                         type: array
@@ -1485,6 +1486,7 @@ spec:
                   type: object
                 description: Components records the rendered components from Application, it will contains the whole K8s CR of workload in it.
                 type: object
+                x-kubernetes-preserve-unknown-fields: true
               scopeDefinitions:
                 additionalProperties:
                   description: A ScopeDefinition registers a kind of Kubernetes custom resource as a valid OAM scope kind by referencing its CustomResourceDefinition. The CRD is used to validate the schema of the scope when it is embedded in an OAM ApplicationConfiguration.

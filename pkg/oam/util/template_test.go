@@ -11,7 +11,6 @@ import (
 	ktypes "k8s.io/apimachinery/pkg/types"
 
 	"github.com/oam-dev/kubevela/apis/core.oam.dev/common"
-	"github.com/oam-dev/kubevela/apis/core.oam.dev/v1alpha2"
 	"github.com/oam-dev/kubevela/apis/types"
 )
 
@@ -81,7 +80,7 @@ spec:
 	tclient := test.MockClient{
 		MockGet: func(ctx context.Context, key ktypes.NamespacedName, obj runtime.Object) error {
 			switch o := obj.(type) {
-			case *v1alpha2.ComponentDefinition:
+			case *v1beta1.ComponentDefinition:
 				cd, err := UnMarshalStringToComponentDefinition(componentDefintion)
 				if err != nil {
 					return err
@@ -199,7 +198,7 @@ spec:
 	tclient := test.MockClient{
 		MockGet: func(ctx context.Context, key ktypes.NamespacedName, obj runtime.Object) error {
 			switch o := obj.(type) {
-			case *v1alpha2.TraitDefinition:
+			case *v1beta1.TraitDefinition:
 				wd, err := UnMarshalStringToTraitDefinition(traitDefintion)
 				if err != nil {
 					return err

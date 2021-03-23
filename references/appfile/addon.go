@@ -14,7 +14,7 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
-	"github.com/oam-dev/kubevela/apis/core.oam.dev/v1alpha2"
+	"github.com/oam-dev/kubevela/apis/core.oam.dev/v1beta1"
 	"github.com/oam-dev/kubevela/apis/types"
 	"github.com/oam-dev/kubevela/pkg/appfile"
 	"github.com/oam-dev/kubevela/pkg/controller/utils"
@@ -42,7 +42,7 @@ func ApplyTerraform(app *v1alpha2.Application, k8sClient client.Client, ioStream
 	}
 
 	// TODO(zzxwill) Need to check whether authentication credentials of a specific cloud provider are exported as environment variables, like `ALICLOUD_ACCESS_KEY`
-	var nativeVelaComponents []v1alpha2.ApplicationComponent
+	var nativeVelaComponents []v1beta1.ApplicationComponent
 	// parse template
 	appParser := appfile.NewApplicationParser(k8sClient, dm, pd)
 

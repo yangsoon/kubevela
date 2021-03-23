@@ -14,6 +14,7 @@ import (
 
 	"github.com/oam-dev/kubevela/apis/core.oam.dev/common"
 	"github.com/oam-dev/kubevela/apis/core.oam.dev/v1alpha2"
+	"github.com/oam-dev/kubevela/apis/core.oam.dev/v1beta1"
 	"github.com/oam-dev/kubevela/apis/types"
 	"github.com/oam-dev/kubevela/pkg/appfile/config"
 	"github.com/oam-dev/kubevela/pkg/appfile/helm"
@@ -146,7 +147,7 @@ func NewApplicationParser(cli client.Client, dm discoverymapper.DiscoveryMapper,
 }
 
 // GenerateAppFile converts an application to an Appfile
-func (p *Parser) GenerateAppFile(ctx context.Context, name string, app *v1alpha2.Application) (*Appfile, error) {
+func (p *Parser) GenerateAppFile(ctx context.Context, name string, app *v1beta1.Application) (*Appfile, error) {
 	appfile := new(Appfile)
 	appfile.Name = name
 	var wds []*Workload

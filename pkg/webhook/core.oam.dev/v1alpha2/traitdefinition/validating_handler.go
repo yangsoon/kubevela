@@ -41,14 +41,14 @@ type ValidatingHandler struct {
 
 // TraitDefValidator validate trait definition
 type TraitDefValidator interface {
-	Validate(context.Context, v1alpha2.TraitDefinition) error
+	Validate(context.Context, v1beta1.TraitDefinition) error
 }
 
 // TraitDefValidatorFn implements TraitDefValidator
-type TraitDefValidatorFn func(context.Context, v1alpha2.TraitDefinition) error
+type TraitDefValidatorFn func(context.Context, v1beta1.TraitDefinition) error
 
 // Validate implements TraitDefValidator method
-func (fn TraitDefValidatorFn) Validate(ctx context.Context, td v1alpha2.TraitDefinition) error {
+func (fn TraitDefValidatorFn) Validate(ctx context.Context, td v1beta1.TraitDefinition) error {
 	return fn(ctx, td)
 }
 
@@ -56,7 +56,7 @@ var _ admission.Handler = &ValidatingHandler{}
 
 // Handle validate trait definition
 func (h *ValidatingHandler) Handle(ctx context.Context, req admission.Request) admission.Response {
-	obj := &v1alpha2.TraitDefinition{}
+	obj := &v1beta1.TraitDefinition{}
 	if req.Resource.String() != traitDefGVR.String() {
 		return admission.Errored(http.StatusBadRequest, fmt.Errorf("expect resource to be %s", traitDefGVR))
 	}
@@ -114,7 +114,7 @@ func RegisterValidatingHandler(mgr manager.Manager, args controller.Args) {
 // or it has a patch and outputs, and all outputs must have GVK
 // TODO(roywang) currently we only validate whether it contains CUE template.
 // Further validation, e.g., output with GVK, valid patch, etc, remains to be done.
-func ValidateDefinitionReference(_ context.Context, td v1alpha2.TraitDefinition) error {
+func ValidateDefinitionReference(_ context.Context, td v1beta1.TraitDefinition) error {
 	if len(td.Spec.Reference.Name) > 0 {
 		return nil
 	}

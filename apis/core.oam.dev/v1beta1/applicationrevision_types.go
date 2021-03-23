@@ -41,6 +41,7 @@ type ApplicationRevisionSpec struct {
 	ScopeDefinitions map[string]ScopeDefinition `json:"scopeDefinitions,omitempty"`
 
 	// Components records the rendered components from Application, it will contains the whole K8s CR of workload in it.
+	// +kubebuilder:pruning:PreserveUnknownFields
 	Components map[string]runtime.RawExtension `json:"components,omitempty"`
 
 	// ApplicationConfiguration records the rendered applicationConfiguration from Application,

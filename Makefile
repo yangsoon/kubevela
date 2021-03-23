@@ -209,6 +209,9 @@ core-uninstall: manifests
 # Generate manifests e.g. CRD, RBAC etc.
 manifests:
 	go generate $(foreach t,pkg apis,./$(t)/...)
+	# TODO(yangsoon): remove fixed file path
+	kustomize build config/crd -o config/crd/base/core.oam.dev_applications.yaml
+	mv config/crd/base/* charts/vela-core/crds
 	./hack/vela-templates/gen_definitions.sh
 
 GOLANGCILINT_VERSION ?= v1.31.0

@@ -15,12 +15,12 @@ import (
 )
 
 var _ = It("Test ApplyTerraform", func() {
-	app := &v1alpha2.Application{
+	app := &v1beta1.Application{
 		ObjectMeta: v1.ObjectMeta{Name: "test-terraform-app"},
-		Spec: v1alpha2.ApplicationSpec{Components: []v1alpha2.ApplicationComponent{{
+		Spec: v1beta1.ApplicationSpec{Components: []v1beta1.ApplicationComponent{{
 			Name:         "test-terraform-svc",
 			WorkloadType: "aliyun-oss",
-			Settings:     runtime.RawExtension{Raw: []byte("{\"bucket\": \"oam-website\"}")},
+			Properties:   runtime.RawExtension{Raw: []byte("{\"bucket\": \"oam-website\"}")},
 		},
 		}},
 	}
