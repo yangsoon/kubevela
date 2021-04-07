@@ -27,6 +27,7 @@ import (
 	"cuelang.org/go/cue/ast"
 	"cuelang.org/go/cue/format"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
+	"k8s.io/klog"
 
 	"github.com/oam-dev/kubevela/pkg/dsl/model/sets"
 )
@@ -93,6 +94,10 @@ func (inst *instance) Unify(other Instance) error {
 	pv, err := sets.StrategyUnify(inst.v, other.String())
 	if err != nil {
 		return err
+	}
+	klog.Infof("XXX patch value %v XXX\n", pv)
+	if strings.Contains(pv, "_|_") {
+		return errors.New(IndexMatchLine(pv, "_|_"))
 	}
 	inst.v = pv
 	return nil

@@ -1507,6 +1507,40 @@ spec:
 		By("Delete Application, clean the resource")
 		Expect(k8sClient.Delete(ctx, app)).Should(BeNil())
 	})
+
+	FIt("corner case", func() {
+		ns := &corev1.Namespace{
+			ObjectMeta: metav1.ObjectMeta{
+				Name: "conner",
+			},
+		}
+		Expect(k8sClient.Create(ctx, ns)).Should(BeNil())
+
+		wd := &v1beta1.WorkloadDefinition{}
+		wDDefJson, _ := yaml.YAMLToJSON([]byte(connerWd))
+		Expect(json.Unmarshal(wDDefJson, wd)).Should(BeNil())
+		wd.SetNamespace(ns.Name)
+		Expect(k8sClient.Create(ctx, wd)).Should(SatisfyAny(BeNil(), &util.AlreadyExistMatcher{}))
+
+		td := &v1beta1.TraitDefinition{}
+		tDDefJson, _ := yaml.YAMLToJSON([]byte(connerTd))
+		Expect(json.Unmarshal(tDDefJson, td)).Should(BeNil())
+		td.SetNamespace(ns.Name)
+		Expect(k8sClient.Create(ctx, td)).Should(SatisfyAny(BeNil(), &util.AlreadyExistMatcher{}))
+
+		app := &v1beta1.Application{}
+		appJson, _ := yaml.YAMLToJSON([]byte(connerApp))
+		Expect(json.Unmarshal(appJson, app)).Should(BeNil())
+		app.SetNamespace(ns.Name)
+		Expect(k8sClient.Create(ctx, app)).Should(SatisfyAny(BeNil(), &util.AlreadyExistMatcher{}))
+
+		appKey := client.ObjectKey{
+			Name:      app.Name,
+			Namespace: app.Namespace,
+		}
+		By("Check corner Application")
+		reconcileRetry(reconciler, reconcile.Request{NamespacedName: appKey})
+	})
 })
 
 func reconcileRetry(r reconcile.Reconciler, req reconcile.Request) {
@@ -1520,7 +1554,7 @@ func reconcileRetry(r reconcile.Reconciler, req reconcile.Request) {
 			return fmt.Errorf("reconcile timeout as it still needs to requeue")
 		}
 		return err
-	}, 30*time.Second, time.Second).Should(BeNil())
+	}, 3*time.Second, time.Second).Should(BeNil())
 }
 
 const (
@@ -2255,6 +2289,565 @@ spec:
       	endpoint: string
       	port:     string
       }
+`
+
+	connerTd = `
+apiVersion: core.oam.dev/v1beta1
+kind: TraitDefinition
+metadata:
+  annotations:
+    definition.oam.dev/description: conner test
+  name: tracing-solution-arms
+  namespace: conner
+spec:
+  appliesToWorkloads:
+  - webservice
+  - worker
+  schematic:
+    cue:
+      template: |
+        package tracing
+
+        if parameter.appRuntime.spec.enabled {
+          patch: {
+            spec: template: spec: {
+              // +patchKey=name
+              initContainers: [{
+                command: ["/bin/sh"]
+                args: [
+                  "ls"
+                ]
+                env: [{
+                  name:  "ARMS_AGENT_DOWNLOAD_URL"
+                  value: "xx.zip"
+                }]
+                image:           "alpine:3.10.0"
+                imagePullPolicy: "IfNotPresent"
+                name:            "arms-init-container"
+                resources: {
+                  limits: {
+                    cpu:    "200m"
+                    memory: "200Mi"
+                  }
+                  requests: {
+                    cpu:    "200m"
+                    memory: "200Mi"
+                  }
+                }
+                // +patchKey=mountPath
+                volumeMounts: [{
+                  mountPath: #javaAgentMountPath
+                  name:      #javaAgentVolumeName
+                }]
+              }]
+              // +patchKey=name
+              containers: [
+                for c in parameter.appBase.spec {
+                  name: c.containerName
+                  // +patchKey=name
+                  env: [{
+                    name:  "JAVA_TOOL_OPTIONS"
+                    value: *#envValue | string
+                    for oc in context.output.spec.template.spec.containers {
+                      if oc.name == c.containerName {
+                        if oc["env"] != _|_ {
+                          for e in oc["env"] {
+                            if e.name == "JAVA_TOOL_OPTIONS" {
+                              value: e.value + #envValue
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }]
+
+                  // +patchKey=mountPath
+                  volumeMounts: [{
+                    name:      #javaAgentVolumeName
+                    mountPath: #javaAgentMountPath
+                  }]
+                },
+              ]
+              // +patchKey=name
+              volumes: [{
+                name: #javaAgentVolumeName
+                emptyDir: {}
+              }]
+            }
+          }
+        }
+
+        #javaAgentVolumeName: "arms-agent-vol"
+        #javaAgentMountPath:  "/home/admin/.opt"
+        #envValue:            " -javaagent:/home/admin/xx.jar" +
+          " -Darms.licenseKey=" + parameter.appRuntime.spec.licenseKey +
+          " -Darms.appId=" + parameter.appRuntime.spec.appId +
+          " -Darms.agent.env=" + parameter.appRuntime.spec.agentEnv +
+          " -Darms.agent.args=" + parameter.appRuntime.spec.agentArgs +
+          " " + parameter.appRuntime.spec.agentCustomEnv
+
+        #ContainerTracing: {
+          containerName: string
+        }
+
+        #TracingSettings: {
+          enabled:        bool | *true
+          licenseKey:     string
+          appId:          string
+          agentEnv:       string
+          agentArgs:      string
+          agentCustomEnv: string
+        }
+
+        parameter: {
+          appBase: spec: [...#ContainerTracing]
+          appRuntime: spec: #TracingSettings
+        }
+
+`
+
+	connerWd = `
+apiVersion: core.oam.dev/v1beta1
+kind: WorkloadDefinition
+metadata:
+  annotations:
+    definition.oam.dev/description: cloneset was composed by cloneset and service
+  name: cloneset
+  namespace: conner
+spec:
+  definitionRef:
+    name: deployments.app
+  extension:
+    template: |
+      import "path"
+      import "crypto/md5"
+      import "encoding/hex"
+      output: {
+        apiVersion: "apps.kruise.io/v1alpha1"
+        kind:       "CloneSet"
+        spec: {
+          selector: matchLabels: {
+            "app.oam.dev/component": context.name
+          }
+          template: {
+            metadata: labels: {
+              "app.oam.dev/component": context.name
+            }
+            spec: {
+              containers: [{
+                name:  "main"
+                image: parameter.main.image
+                command: parameter.main.cmd
+                args: parameter.main.args
+                ports: [
+                  for _, v in parameter.main.exposed {
+                    containerPort: v.port
+                    if v.type == "http" || v.type == "HTTP" {
+                      protocol: "TCP"
+                    }
+                    if v.type == "tcp" || v.type == "TCP" {
+                      protocol: "TCP"
+                    }
+                    if v.type == "udp" || v.type == "UDP" {
+                      protocol: "UDP"
+                    }
+                  },
+                ]
+
+                //render env
+                if parameter.main.env != _|_ {
+                  env: parameter.main.env
+                }
+
+                //render resource
+                if parameter.main.resources != _|_ {
+                  resources: requests: parameter.main.resources
+                }
+
+                //render volumeMounts
+                if parameter.main.configFiles != _|_ {
+                  volumeMounts: [
+                    for _, v in parameter.main.configFiles {
+                      if v.data != _|_ {
+                        name:      hex.Encode(md5.Sum(v.path)) + "-config"
+                        mountPath: v.path
+                        subPath:   path.Base(v.path)
+                      }
+                      if v.data == _|_ && v.dataFrom != _|_ {
+                        name:      hex.Encode(md5.Sum(v.path)) + "-" + v.dataFrom.secretKeyRef.key
+                        mountPath: path.Dir(v.path)
+                      }
+                    },
+                  ]
+                }
+
+                // render probe
+                if parameter.main.livenessProbe.exec != _|_ {
+                  livenessProbe: {
+                    exec: command: parameter.main.livenessProbe.exec
+                    initialDelaySeconds: parameter.main.livenessProbe.initialDelaySeconds
+                    periodSeconds: parameter.main.livenessProbe.periodSeconds
+                    timeoutSeconds: parameter.main.livenessProbe.timeoutSeconds
+                    successThreshold: parameter.main.livenessProbe.successThreshold
+                    failureThreshold: parameter.main.livenessProbe.failureThreshold
+                  }
+                }
+                if parameter.main.readinessProbe.exec != _|_ {
+                  readinessProbe: {
+                    exec: command: parameter.main.readinessProbe.exec
+                    initialDelaySeconds: parameter.main.readinessProbe.initialDelaySeconds
+                    periodSeconds:       parameter.main.readinessProbe.periodSeconds
+                    timeoutSeconds:      parameter.main.readinessProbe.timeoutSeconds
+                    successThreshold:    parameter.main.readinessProbe.successThreshold
+                    failureThreshold:    parameter.main.readinessProbe.failureThreshold
+                  }
+                }
+                if parameter.main.startupProbe.exec != _|_ {
+                  startupProbe: {
+                    exec: command: parameter.main.startupProbe.exec
+                    initialDelaySeconds: parameter.main.startupProbe.initialDelaySeconds
+                    periodSeconds:       parameter.main.startupProbe.periodSeconds
+                    timeoutSeconds:      parameter.main.startupProbe.timeoutSeconds
+                    successThreshold:    parameter.main.startupProbe.successThreshold
+                    failureThreshold:    parameter.main.startupProbe.failureThreshold
+                  }
+                }
+
+                if parameter.main.livenessProbe.http != _|_ {
+                  livenessProbe: {
+                    httpGet:             parameter.main.livenessProbe.http
+                    initialDelaySeconds: parameter.main.livenessProbe.initialDelaySeconds
+                    periodSeconds:       parameter.main.livenessProbe.periodSeconds
+                    timeoutSeconds:      parameter.main.livenessProbe.timeoutSeconds
+                    successThreshold:    parameter.main.livenessProbe.successThreshold
+                    failureThreshold:    parameter.main.livenessProbe.failureThreshold
+                  }
+                }
+                if parameter.main.readinessProbe.http != _|_ {
+                  readinessProbe: {
+                    httpGet:parameter.main.readinessProbe.http
+                    initialDelaySeconds:parameter.main.readinessProbe.initialDelaySeconds
+                    periodSeconds:parameter.main.readinessProbe.periodSeconds
+                    timeoutSeconds:parameter.main.readinessProbe.timeoutSeconds
+                    successThreshold:parameter.main.readinessProbe.successThreshold
+                    failureThreshold:parameter.main.readinessProbe.failureThreshold
+                  }
+                }
+
+                if parameter.main.startupProbe.http != _|_ {
+                  startupProbe: {
+                    httpGet:parameter.main.startupProbe.http
+                    initialDelaySeconds:parameter.main.startupProbe.initialDelaySeconds
+                    periodSeconds:parameter.main.startupProbe.periodSeconds
+                    timeoutSeconds:parameter.main.startupProbe.timeoutSeconds
+                    successThreshold:parameter.main.startupProbe.successThreshold
+                    failureThreshold:parameter.main.startupProbe.failureThreshold
+                  }
+                }
+
+                if parameter.main.livenessProbe.tcp != _|_ {
+                  livenessProbe: {
+                    tcpSocket:parameter.main.livenessProbe.tcp
+                    initialDelaySeconds:parameter.main.livenessProbe.initialDelaySeconds
+                    periodSeconds:parameter.main.livenessProbe.periodSeconds
+                    timeoutSeconds:parameter.main.livenessProbe.timeoutSeconds
+                    successThreshold:parameter.main.livenessProbe.successThreshold
+                    failureThreshold:parameter.main.livenessProbe.failureThreshold
+                  }
+                }
+                if parameter.main.readinessProbe.tcp != _|_ {
+                  readinessProbe: {
+                    tcpSocket:parameter.main.readinessProbe.tcp
+                    initialDelaySeconds:parameter.main.readinessProbe.initialDelaySeconds
+                    periodSeconds:parameter.main.readinessProbe.periodSeconds
+                    timeoutSeconds:parameter.main.readinessProbe.timeoutSeconds
+                    successThreshold:parameter.main.readinessProbe.successThreshold
+                    failureThreshold:parameter.main.readinessProbe.failureThreshold
+                  }
+                }
+                if parameter.main.startupProbe.tcp != _|_ {
+                  startupProbe: {
+                    tcpSocket:parameter.main.startupProbe.tcp
+                    initialDelaySeconds:parameter.main.startupProbe.initialDelaySeconds
+                    periodSeconds:parameter.main.startupProbe.periodSeconds
+                    timeoutSeconds:parameter.main.startupProbe.timeoutSeconds
+                    successThreshold:parameter.main.startupProbe.successThreshold
+                    failureThreshold:parameter.main.startupProbe.failureThreshold
+                  }
+                }
+              }]
+              if parameter.main.configFiles != _|_ {
+                volumes: [
+                  for _, v in parameter.main.configFiles {
+                    if v.data != _|_ {
+                      name:hex.Encode(md5.Sum(v.path)) + "-config"
+                      configMap: {
+                        name:context.appName + "-" + context.name + "-main"
+                        items:[{
+                          key: hex.Encode(md5.Sum(v.path))
+                          "path":path.Base(v.path)
+                        }]
+                      }
+                    }
+                    if v.data == _|_ && v.dataFrom != _|_ {
+                      name: hex.Encode(md5.Sum(v.path)) +"-" + v.dataFrom.secretKeyRef.key
+                      secret: {
+                        secretName: v.dataFrom.secretKeyRef.name
+                        items: [{
+                          key: v.dataFrom.secretKeyRef.key
+                          "path": path.Base(v.path)
+                        }]
+                      }
+                    }
+                  },
+                ]
+              }
+            }
+          }
+        }
+      }
+
+      outputs: service: {
+        apiVersion: "v1"
+        kind:       "Service"
+        spec: {
+          selector:
+          {
+            "app.oam.dev/component": context.name
+          }
+          ports: [
+            for _, v in parameter.main.exposed {
+              if v.type == "http" || v.type == "HTTP" {
+                protocol:   "TCP"
+                port:       v.port
+                targetPort: v.port
+                name:       v.name
+              }
+              if v.type == "tcp" || v.type == "TCP" {
+                protocol:   "TCP"
+                port:       v.port
+                targetPort: v.port
+                name:       v.name
+              }
+              if v.type == "udp" || v.type == "UDP" {
+                protocol:   "UDP"
+                port:       v.port
+                targetPort: v.port
+                name:       v.name
+              }
+            },
+          ]
+        }
+      }
+
+      outputs: configMap: {
+        apiVersion: "v1"
+        kind:       "ConfigMap"
+        metadata:name: context.appName + "-" + context.name + "-main"
+        data: {
+          if parameter.main.configFiles != _|_ {
+            for _, v in parameter.main.configFiles {
+              if v.data != _|_ {
+                "\(hex.Encode(md5.Sum(v.path)))": v.data
+              }
+            }
+          }
+        }
+      }
+
+      //about probe
+      #Probe: {
+        #handler
+        initialDelaySeconds: *0 | int32
+        periodSeconds:       *10 | int32 & >0
+        timeoutSeconds:      *1 | int32 & >0
+        successThreshold:    *1 | int32 & >0
+        failureThreshold:    *10 | int32
+      }
+      #handler: #exec | #http | #tcp
+      #exec: {
+        exec: [...string]
+      }
+      #http:
+      {
+        http: {
+          scheme: "HTTP" | "HTTPS"
+          path:   =~"^[a-zA-Z0-9._@:/\\\\?-]{1,255}$"
+          port:   int32
+          headers?: [...#httpHeader]
+        }
+      }
+      #httpHeader: {
+        name:  =~"^[a-zA-Z0-9._@:/\\\\?-]{1,63}$"
+        value: =~"^[a-zA-Z0-9._@:/\\\\?-]{1,63}$"
+      }
+      #tcp: {
+        tcp: {
+          port:  int32
+          host?: string
+        }
+      }
+
+      //about config file
+      #ConfigFile: {
+        path: string
+        #fileVar
+      }
+      #fileVar: {data: string} | #fileFrom
+      #fileFrom: {
+        dataFrom: {
+          secretKeyRef: {
+            name:
+              string
+            key: string
+          }
+        }
+      }
+
+      //about exposed port
+      #Port: {
+        type: "tcp" | "http" | "udp" | "TCP" | "HTTP" | "UDP"
+        port: *80 | int
+        name: string
+      }
+
+      //about resource
+      #Resource: {
+        cpu: *1 | int & >=1 & <=512
+        memory: *"2048Mi" | =~"^([1-9][0-9]{0,63})(E|P|T|G|M|K|Ei|Pi|Ti|Gi|Mi|Ki)$"
+      }
+
+      //about env
+      #EnvVar: {
+        name: string
+        #envValue
+      }
+      #envValue: {value: string} | #envFrom
+      #envFrom: {
+        valueFrom: {
+          secretKeyRef: {
+            name: string
+            key: string
+          }
+        }
+      }
+
+      //about container
+      #Container: {
+        image: string
+        cmd: [...string]
+        args: [...string]
+        exposed: [...#Port]
+        env?: [...#EnvVar]
+        configFiles?: [...#ConfigFile]
+        resources?:      #Resource
+        livenessProbe?:  #Probe
+        readinessProbe?: #Probe
+        startupProbe?:   #Probe
+      }
+
+      parameter: {
+        main: #Container
+      }
+`
+	connerApp = `
+apiVersion: core.oam.dev/v1beta1
+kind: Application
+metadata:
+  name: testtraitapp
+  namespace: conner
+spec:
+  components:
+  - name: testtraitapp
+    properties:
+      main:
+        args:
+        - -c
+        - sleep 99999999
+        cmd:
+        - /bin/sh
+        configFiles:
+        - data: |
+            testing
+          path: /home/opt/test.properties
+        - data: |
+            daily
+          path: /home/opt/daily.properties
+        - dataFrom:
+            secretKeyRef:
+              key: username
+              name: mysql-demo-secret
+          path: /home/opt/mysql.properties
+        env:
+        - name: ENV_LEVEL
+          value: testing
+        - name: USER_NAME
+          valueFrom:
+            secretKeyRef:
+              key: username
+              name: mysql-demo
+        - name: PASS_WORD
+          valueFrom:
+            secretKeyRef:
+              key: password
+              name: mysql-demo
+        exposed:
+        - name: tcp
+          port: 8080
+          type: tcp
+        - name: http
+          port: 8900
+          type: http
+        image: demo:latest
+        livenessProbe:
+          exec:
+          - /bin/sh
+          - -c
+          - echo livenessProbe
+          failureThreshold: 1
+          initialDelaySeconds: 10
+          periodSeconds: 10
+          successThreshold: 1
+          timeoutSeconds: 1
+        readinessProbe:
+          failureThreshold: 1
+          http:
+            headers:
+            - name: Custom-Header
+              value: Awesome
+            path: /healthz
+            port: 8080
+            scheme: HTTP
+          initialDelaySeconds: 10
+          periodSeconds: 10
+          successThreshold: 1
+          timeoutSeconds: 1
+        resources:
+          cpu: 1
+          memory: 1Gi
+        startupProbe:
+          failureThreshold: 1
+          initialDelaySeconds: 10
+          periodSeconds: 10
+          successThreshold: 1
+          tcp:
+            port: 8080
+          timeoutSeconds: 1
+    traits:
+    - properties:
+        appBase:
+          spec:
+          - containerName: main
+        appRuntime:
+          spec:
+            agentArgs: ""
+            agentCustomEnv: ""
+            agentEnv: ""
+            appId: ""
+            enabled: true
+            licenseKey: ""
+      type: tracing-solution-arms
+    type: cloneset
 `
 )
 
