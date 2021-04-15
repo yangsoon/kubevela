@@ -76,7 +76,7 @@ jobs:
         uses: actions/upload-release-asset@v1.0.2
         with:
           upload_url: ${{ steps.get_release.outputs.upload_url }}
-          asset_path: ./_bin/vela/sha256sums.txt
+          asset_path: ./_bin/vela/vela-sha256sums.txt
           asset_name: vela-sha256sums.txt
           asset_content_type: text/plain
       - name: Upload Kubectl-Vela Linux amd64 tar.gz
@@ -125,7 +125,7 @@ jobs:
         uses: actions/upload-release-asset@v1.0.2
         with:
           upload_url: ${{ steps.get_release.outputs.upload_url }}
-          asset_path: ./_bin/kubectl-vela/sha256sums.txt
+          asset_path: ./_bin/kubectl-vela/kubectl-vela-sha256sums.txt
           asset_name: kubectl-vela-sha256sums.txt
           asset_content_type: text/plain
       - uses: actions/setup-node@v1
