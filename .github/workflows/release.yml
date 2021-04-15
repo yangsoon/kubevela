@@ -23,10 +23,6 @@ jobs:
       - name: Get the version
         id: get_version
         run: echo ::set-output name=VERSION::${GITHUB_REF#refs/tags/}
-      - name: Tag helm chart image
-        run:  |
-          sed -i 's/latest/${{ steps.get_version.outputs.VERSION }}/g' charts/vela-core/values.yaml
-          sed -i 's/0.1.0/${{ steps.get_version.outputs.VERSION }}/g' charts/vela-core/Chart.yaml
       - name: Run cross-build
         run: make cross-build
       - name: Run compress binary
