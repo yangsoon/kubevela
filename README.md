@@ -69,3 +69,8 @@ Check out [CONTRIBUTING](./CONTRIBUTING.md) to see how to develop with KubeVela.
 
 ## Code of Conduct
 KubeVela adopts [CNCF Code of Conduct](https://github.com/cncf/foundation/blob/master/code-of-conduct.md).
+
+## Release Info
+VERSION: master
+GIT_COMMIT: 4aae97eff7e1579c56a089f58adb67a30e6c00b8
+
