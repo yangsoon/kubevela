@@ -48,13 +48,16 @@ test: vet lint staticcheck
 	@$(OK) unit-tests pass
 
 # Build vela cli binary
-build: fmt vet lint staticcheck vela-cli
+build: fmt vet lint staticcheck vela-cli kubectl-vela
 	@$(OK) build succeed
 
 vela-cli:
 	go run hack/chart/generate.go
 	$(GOBUILD_ENV) go build -o bin/vela -a -ldflags $(LDFLAGS) ./references/cmd/cli/main.go
 	git checkout references/cmd/cli/fake/chart_source.go
+
+kubectl-vela:
+	$(GOBUILD_ENV) go build -o bin/kubectl-vela -a -ldflags $(LDFLAGS) ./cmd/plugin/main.go
 
 dashboard-build:
 	cd references/dashboard && npm install && cd ..
@@ -91,19 +94,26 @@ generate-source:
 cross-build:
 	rm -rf _bin
 	go run hack/chart/generate.go
-	$(GOBUILD_ENV) $(GOX) -ldflags $(LDFLAGS) -parallel=2 -output="_bin/{{.OS}}-{{.Arch}}/vela" -osarch='$(TARGETS)' ./references/cmd/cli
+	$(GOBUILD_ENV) $(GOX) -ldflags $(LDFLAGS) -parallel=2 -output="_bin/vela/{{.OS}}-{{.Arch}}/vela" -osarch='$(TARGETS)' ./references/cmd/cli
+	$(GOBUILD_ENV) $(GOX) -ldflags $(LDFLAGS) -parallel=2 -output="_bin/kubectl-vela/{{.OS}}-{{.Arch}}/kubectl-vela" -osarch='$(TARGETS)' ./cmd/plugin
 	git checkout references/cmd/cli/fake/chart_source.go
 
 compress:
 	( \
 		echo "\n## Release Info\nVERSION: $(VELA_VERSION)" >> README.md && \
 		echo "GIT_COMMIT: $(GIT_COMMIT_LONG)\n" >> README.md && \
-		cd _bin && \
-		$(DIST_DIRS) cp ../LICENSE {} \; && \
-		$(DIST_DIRS) cp ../README.md {} \; && \
+		cd _bin/vela && \
+		$(DIST_DIRS) cp ../../LICENSE {} \; && \
+		$(DIST_DIRS) cp ../../README.md {} \; && \
 		$(DIST_DIRS) tar -zcf vela-{}.tar.gz {} \; && \
 		$(DIST_DIRS) zip -r vela-{}.zip {} \; && \
-		sha256sum vela-* > sha256sums.txt \
+		sha256sum vela-* > vela-sha256sums.txt && \
+		cd ../kubectl-vela && \
+		$(DIST_DIRS) cp ../../LICENSE {} \; && \
+		$(DIST_DIRS) cp ../../README.md {} \; && \
+		$(DIST_DIRS) tar -zcf kubectl-vela-{}.tar.gz {} \; && \
+		$(DIST_DIRS) zip -r kubectl-vela-{}.zip {} \; && \
+		sha256sum kubectl-vela-* > kubectl-vela-sha256sums.txt \
 	)
 
 # Run against the configured Kubernetes cluster in ~/.kube/config
