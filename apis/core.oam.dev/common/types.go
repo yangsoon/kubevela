@@ -23,7 +23,7 @@ import (
 	"github.com/oam-dev/kubevela/apis/standard.oam.dev/v1alpha1"
 )
 
-// Kube defines the encapsulation in raw Kubernetes resource format
+// Kube defines the encapsulation in raw Kubernetes resource format a
 type Kube struct {
 	// Template defines the raw Kubernetes resource
 	// +kubebuilder:pruning:PreserveUnknownFields
