@@ -69,4 +69,5 @@ You can build Kubevela website in local to test the correctness of docs, only ru
 
 ```shell
 make docs-build
+
 ```
