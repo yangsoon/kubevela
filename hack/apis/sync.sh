@@ -30,10 +30,12 @@ fi
 
 echo "git clone"
 cd ..
+pwd
 git config --global user.email "kubevela.bot@aliyun.com"
 git config --global user.name "kubevela-bot"
 git clone --single-branch --depth 1 git@github.com:yangsoon/kubevela-core-api.git kubevela-core-api
 
+pwd
 echo "clear kubevela-core-api api/"
 rm -r kubevela-core-api/apis/*
 
@@ -51,6 +53,7 @@ find ./kubevela-core-api -type f -name "*.go" -print0 | xargs -0 sed -i '' 's|gi
 
 echo "test api"
 cd kubevela-core-api
+pwd
 go build test/main.go
 
 echo "push to kubevela-core-api"
