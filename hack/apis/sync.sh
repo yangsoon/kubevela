@@ -17,10 +17,6 @@
 
 set -e
 
-echo "echo VELA_API_DEPLOY"
-echo $VELA_API_DEPLOY
-echo "echo VELA_API_DEPLOY"
-
 if [[ -n "$VELA_API_DEPLOY" ]]
 then
   mkdir -p ~/.ssh
@@ -30,12 +26,10 @@ fi
 
 echo "git clone"
 cd ..
-pwd
 git config --global user.email "kubevela.bot@aliyun.com"
 git config --global user.name "kubevela-bot"
 git clone --single-branch --depth 1 git@github.com:yangsoon/kubevela-core-api.git kubevela-core-api
 
-pwd
 echo "clear kubevela-core-api api/"
 rm -r kubevela-core-api/apis/*
 
@@ -49,7 +43,7 @@ echo "update kubevela-core-api pkg/oam"
 cp -R kubevela/pkg/oam/* kubevela-core-api/pkg/oam/
 
 echo "change import path"
-find ./kubevela-core-api -type f -name "*.go" -print0 | xargs -0 sed -i '' 's|github.com/oam-dev/kubevela/|github.com/oam-dev/kubevela-core-api/|g'
+find ./kubevela-core-api -type f -name "*.go" -print0 | xargs -0 sed -i 's|github.com/oam-dev/kubevela/|github.com/oam-dev/kubevela-core-api/|g'
 
 echo "test api"
 cd kubevela-core-api
