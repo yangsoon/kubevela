@@ -57,5 +57,5 @@ then
 else
   git add .
   git commit -m "sync commit $COMMIT_ID from kubevela-$VERSION"
-  git push origin main
+  git push origin master
 fi
