@@ -14,6 +14,6 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-// Package common contains types required for both v1alpha2 and v1beta1
+// Package common contains types required  for both v1alpha2 and v1beta1
 // +kubebuilder:object:generate=true
 package common
