@@ -3,9 +3,6 @@ on:
   push:
     tags:
       - "v*"
-    branches:
-      - master
-      - release-*
 
 jobs:
   sync-core-api:
@@ -30,7 +27,7 @@ jobs:
       - name: Sync to kubevela-core-api Repo
         env:
           VELA_API_DEPLOY: ${{ secrets.VELA_API_DEPLOY }}
-          VERSION: ${{ github.ref }}
+          VERSION: ${{ steps.get_version.outputs.VERSION }}
           COMMIT_ID: ${{ github.sha }}
         run: |
           bash ./hack/apis/sync.sh
