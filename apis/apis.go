@@ -14,5 +14,5 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-// Package apis contains all api types of KubeVela
+// Package apis contains all api  types of KubeVela
 package apis
