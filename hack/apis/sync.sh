@@ -28,7 +28,7 @@ echo "git clone"
 cd ..
 git config --global user.email "kubevela.bot@aliyun.com"
 git config --global user.name "kubevela-bot"
-git clone --single-branch --depth 1 git@github.com:oam-dev/kubevela-core-api.git kubevela-core-api
+git clone --single-branch --depth 1 git@github.com:yangsoon/kubevela-core-api.git kubevela-core-api
 
 echo "clear kubevela-core-api api/"
 rm -r kubevela-core-api/apis/*
@@ -56,5 +56,7 @@ then
 else
   git add .
   git commit -m "align with kubevela-$VERSION from commit $COMMIT_ID"
-  git push origin main
+  git tag $VERSION
+  git push origin master
+  git push origin $VERSION
 fi
