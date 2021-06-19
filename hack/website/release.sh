@@ -27,20 +27,20 @@ then
 fi
 
 echo "git clone"
-git config --global user.email "kubevela.bot@aliyun.com"
-git config --global user.name "kubevela-bot"
-git clone --single-branch --depth 1 git@github.com:oam-dev/kubevela.io.git git-page
+#git config --global user.email "kubevela.bot@aliyun.com"
+#git config --global user.name "kubevela-bot"
+git clone --single-branch --depth 1 https://github.com/oam-dev/kubevela.io.git git-page
 
 echo "sidebars updates"
-cat docs/sidebars.js > git-page/sidebars.js
+#cat docs/sidebars.js > git-page/sidebars.js
 
 echo "clear en docs"
-rm -r git-page/docs/*
+#rm -r git-page/docs/*
 #echo "clear zh docs"
 #rm -r git-page/i18n/zh/docusaurus-plugin-content-docs/*
 
 echo "update docs"
-cp -R docs/en/* git-page/docs/
+#cp -R docs/en/* git-page/docs/
 #cp -R docs/zh-CN/* git-page/i18n/zh/docusaurus-plugin-content-docs/
 
 echo "git push"
@@ -65,6 +65,8 @@ then
     sed -i.bak "/${version}/d" versions.json
     rm versions.json.bak
   fi
+
+  python3 ../hack/website/format.py json versions.json
 
   yarn add nodejieba
   if [ -e yarn.lock ]; then
@@ -97,6 +99,8 @@ then
     sed -i.bak "/${version}/d" versions.json
     rm versions.json.bak
   fi
+
+  python3 ../hack/website/format.py json versions.json
 
   yarn add nodejieba
   if [ -e yarn.lock ]; then
