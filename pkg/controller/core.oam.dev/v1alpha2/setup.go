@@ -23,9 +23,6 @@ import (
 	"github.com/oam-dev/kubevela/pkg/controller/core.oam.dev/v1alpha2/appdeployment"
 	"github.com/oam-dev/kubevela/pkg/controller/core.oam.dev/v1alpha2/application"
 	"github.com/oam-dev/kubevela/pkg/controller/core.oam.dev/v1alpha2/applicationconfiguration"
-	"github.com/oam-dev/kubevela/pkg/controller/core.oam.dev/v1alpha2/applicationcontext"
-	"github.com/oam-dev/kubevela/pkg/controller/core.oam.dev/v1alpha2/applicationrollout"
-	"github.com/oam-dev/kubevela/pkg/controller/core.oam.dev/v1alpha2/core/components/componentdefinition"
 	"github.com/oam-dev/kubevela/pkg/controller/core.oam.dev/v1alpha2/core/scopes/healthscope"
 	"github.com/oam-dev/kubevela/pkg/controller/core.oam.dev/v1alpha2/core/traits/manualscalertrait"
 	"github.com/oam-dev/kubevela/pkg/controller/core.oam.dev/v1alpha2/core/traits/traitdefinition"
@@ -36,8 +33,6 @@ import (
 func Setup(mgr ctrl.Manager, args controller.Args) error {
 	for _, setup := range []func(ctrl.Manager, controller.Args) error{
 		containerizedworkload.Setup, manualscalertrait.Setup, healthscope.Setup,
-		application.Setup, applicationrollout.Setup, applicationcontext.Setup, appdeployment.Setup,
-		traitdefinition.Setup, componentdefinition.Setup,
 	} {
 		if err := setup(mgr, args); err != nil {
 			return err

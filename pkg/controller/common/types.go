@@ -17,16 +17,11 @@ limitations under the License.
 package common
 
 const (
-	// AutoscaleControllerName is the controller name of Trait autoscale
-	AutoscaleControllerName = "autoscale"
-	// MetricsControllerName is the controller name of Trait metrics
-	MetricsControllerName = "metrics"
 	// PodspecWorkloadControllerName is the controller name of Workload podsepcworkload
 	PodspecWorkloadControllerName = "podspecworkload"
-	// RouteControllerName is the controller name of Trait route
-	RouteControllerName = "route"
-	// RollingComponentsSep is the separator that divide the names in the newComponent annotation
-	RollingComponentsSep = ","
+	// ApplicationControllerName is the Application controller
+	ApplicationControllerName = "application"
+
 	// DisableAllCaps disable all capabilities
 	DisableAllCaps = "all"
 	// DisableNoneCaps disable none of capabilities
