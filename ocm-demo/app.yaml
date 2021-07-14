@@ -1,0 +1,12 @@
+apiVersion: core.oam.dev/v1beta1
+kind: Application
+metadata:
+  name: ocm-web
+  namespace: kind-cluster1
+spec:
+  components:
+    - name: register
+      type: ocm-webservice
+      properties:
+        image: crccheck/hello-world
+        port: 8000
