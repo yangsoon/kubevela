@@ -692,6 +692,9 @@ spec:
               description: The generation observed by the Initializer controller.
               format: int64
               type: integer
+            status:
+              description: InitializerPhase is a label for the condition of a initializer at the current time
+              type: string
           type: object
       type: object
   version: v1beta1
